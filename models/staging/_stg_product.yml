@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_product
+    description: "Cleaned and standardized product master data"
+    
+    columns:
+      - name: product_id
+        description: "Unique product identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: product_name
+        description: "Name of the product"
+        tests:
+          - not_null
+      
+      - name: product_category_id
+        description: "Foreign key to product category table"
+        tests:
+          - not_null

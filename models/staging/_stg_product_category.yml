@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: stg_product_category
+    description: "Denormalized product master with embedded category info, combining product, supplier and product category data, for easier analysis"
+    columns:
+      - name: product_id
+        description: "Unique identifier for each product"
+        tests:
+          - unique
+          - not_null
+      
+      - name: product_category_id
+        description: "Foreign key to product table"
+        tests:
+          - not_null
+      
+      - name: category_name
+        description: "Name of the product category"
+        tests:
+          - not_null
+      
+      - name: subcategory_name
+        description: "Name of the product subcategory"
+        tests:
+          - not_null
+      
+      - name: brand_name
+        description: "Brand of the product"
+        tests:
+          - not_null
+      
+      - name: supplier_id
+        description: "Foreign key to supplier table"
+        tests:
+          - not_null
+      
+      - name: cost_price
+        description: "Cost price of the product"
+        tests:
+          - not_null
+      
+      - name: margin_percent
+        description: "Profit margin percentage"
+        tests:
+          - not_null
+      
+      - name: stock_level
+        description: "Current stock level(in integers) of the product"
+        tests:
+          - not_null
+      
+      - name: reorder_point
+        description: "Reorder point for the product"
+        tests:
+          - not_null
+
+      - name: is_discontinued
+        description: "Boolean flag indicating if the product is discontinued"
+        tests:
+          - not_null
+
+      - name: launch_date
+        description: "Date when the product was launched"
+        tests:
+          - not_null
+
+      - name: last_updated
+        description: "Timestamp of the last update to the product record"
+        tests:
+          - not_null

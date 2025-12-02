@@ -1,0 +1,1 @@
+SELECT * FROM {{ ref('stg_sales_fact') }} LIMIT 5

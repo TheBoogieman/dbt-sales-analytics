@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_sales_fact
+    description: "Cleaned and standardized sales transaction data from raw CSV"
+    
+    columns:
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - unique
+          - not_null
+      
+      - name: product_id
+        description: "Foreign key to product table"
+        tests:
+          - not_null
+      
+      - name: customer_id
+        description: "Foreign key to customer table"
+        tests:
+          - not_null
+      
+      - name: order_date
+        description: "Date when order was placed"
+        tests:
+          - not_null
+      
+      - name: order_amount
+        description: "Total order amount before discount"
+        tests:
+          - not_null
+      
+      - name: order_quantity
+        description: "Number of items ordered"
+        tests:
+          - not_null
+      
+      - name: payment_method
+        description: "Method of payment used"
+        tests:
+          - not_null:
+              severity: warn
+          - accepted_values:
+              values: ['credit_card', 'paypal', 'debit_card', 'bank_transfer']
+              severity: warn
+      
+      - name: discount_rate
+        description: "Discount applied as decimal (0.10 = 10%)"
+        tests:
+          - not_null:
+              severity: warn
+      
+      - name: shipping_cost
+        description: "Shipping charges for the order"
+        tests:
+          - not_null:
+              severity: warn
+      
+      - name: net_order_amount
+        description: "Order amount after discount applied"
+        tests:
+          - not_null:
+              severity: warn

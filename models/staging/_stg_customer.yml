@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_customer
+    description: "Cleaned and standardized customer master data"
+    
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: customer_name
+        description: "Customer full name"
+        tests:
+          - not_null
+      
+      - name: customer_email
+        description: "Customer email address (lowercase)"
+        tests:
+          - not_null
+          - unique
+      
+      - name: account_start_date
+        description: "Date when customer account was created"
+        tests:
+          - not_null
+      
+      - name: account_end_date
+        description: "Date when account expires or was closed (null if active)"
+      
+      - name: account_status
+        description: "Current account status"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['active', 'inactive', 'suspended', 'closed', 'cancelled']
+              severity: warn
+      
+      - name: is_active
+        description: "Boolean flag for active customers"
+        tests:
+          - not_null
+      
+      - name: account_tenure_days
+        description: "Number of days customer has been with company"
+        tests:
+          - not_null

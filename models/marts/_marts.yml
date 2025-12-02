@@ -1,0 +1,490 @@
+version: 2
+
+models:
+  # ============================================
+  # CUSTOMER SEGMENTATION (Q3)
+  # ============================================
+  - name: mart_customer_segmentation
+    description: |
+      Customer segmentation model classifying customers into value tiers 
+      based on lifetime purchase behavior. Used for targeted marketing, 
+      retention campaigns, and customer lifetime value analysis.
+      
+      **Business Logic:**
+      - High Value: Lifetime spend ≥ $1,000
+      - Medium Value: Lifetime spend $500-$999  
+      - Low Value: Lifetime spend < $500
+      
+      **Refresh Schedule:** Daily
+      **Primary Use Cases:** 
+      - Marketing campaign targeting
+      - Customer retention prioritization
+      - LTV reporting and forecasting
+    
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: customer_name
+        description: "Customer full name"
+        tests:
+          - not_null
+      
+      - name: customer_tier
+        description: "Value-based customer segment (High/Medium/Low Value)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['High Value', 'Medium Value', 'Low Value']
+      
+      - name: lifetime_net_amount
+        description: "Total amount customer has spent (after discounts, before shipping)"
+        tests:
+          - not_null
+      
+      - name: total_orders
+        description: "Number of orders customer has placed"
+        tests:
+          - not_null
+      
+      - name: order_frequency_segment
+        description: "Segmentation based on order count (Frequent/Regular/Repeat/One-Time Buyer)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Frequent Buyer', 'Regular Buyer', 'Repeat Buyer', 'One-Time Buyer']
+      
+      - name: recency_segment
+        description: "Customer activity status based on last order date"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Active', 'Lapsing', 'At Risk', 'Inactive']
+      
+      - name: overall_value_rank
+        description: "Customer rank by lifetime value (1 = highest spender)"
+        tests:
+          - unique
+          - not_null
+
+  # ============================================
+  # ORDER FLAGS MODEL (Q5)
+  # ============================================
+  
+  - name: mart_order_flags
+    description: |
+      Order review and flagging system identifying potentially problematic orders
+      based on business rules around discounts and shipping costs. Used by 
+      operations team for fraud detection, pricing review, and shipping audits.
+      
+      **Business Rules (Question 5):**
+      - High Discount: discount_rate > 30%
+      - High Shipping: shipping_cost > 10% of order_amount
+      - Needs Review: Either condition is true
+      
+      **Null Handling:**
+      Null values in discount_rate and shipping_cost are coalesced to 0 in the
+      intermediate layer. Original null status is tracked via had_null_discount
+      and had_null_shipping flags for data quality monitoring.
+      
+      **Refresh Schedule:** Hourly (near real-time for operational use)
+      
+      **Primary Use Cases:**
+      - Order review queue for operations team
+      - Fraud detection and prevention
+      - Pricing policy compliance monitoring
+      - Shipping cost audit and optimization
+      
+      **SLA:** Critical orders (both flags) reviewed within 2 hours
+    
+    columns:
+      # Identifiers
+      - name: order_id
+        description: "Unique order identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: customer_id
+        description: "Customer who placed the order"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customer')
+              field: customer_id
+      
+      - name: product_id
+        description: "Product ordered"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_product')
+              field: product_id
+      
+      # Financial metrics
+      - name: order_amount
+        description: "Order total before discount (gross amount)"
+        tests:
+          - not_null
+      
+      - name: discount_rate
+        description: "Discount applied as decimal (0.10 = 10%)"
+        tests:
+          - not_null
+      
+      - name: shipping_cost
+        description: "Shipping charges for the order"
+        tests:
+          - not_null
+      
+      - name: net_order_amount
+        description: "Order amount after discount applied"
+        tests:
+          - not_null
+      
+      - name: discount_amount_dollars
+        description: "Discount amount in currency (order_amount - net_order_amount)"
+      
+      - name: shipping_pct_of_order
+        description: "Shipping cost as percentage of order amount"
+        tests:
+          - not_null
+      
+      # Review flags (core business logic)
+      - name: is_high_discount_order
+        description: "Boolean flag: discount_rate > 30%"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      
+      - name: is_high_shipping_order
+        description: "Boolean flag: shipping_cost > 10% of order_amount"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      
+      - name: needs_review
+        description: "Boolean flag: order requires manual review (either high discount OR high shipping)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      
+      # Null handling transparency
+      - name: had_null_discount
+        description: "Flag indicating discount was null in source data (coalesced to 0)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      
+      - name: had_null_shipping
+        description: "Flag indicating shipping was null in source data (coalesced to 0)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      
+      # Prioritization fields
+      - name: violation_count
+        description: "Number of business rules violated (0, 1, or 2)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1, 2]
+      
+      - name: severity_level
+        description: "Order severity classification based on rule violations"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Normal', 'Warning', 'Critical']
+      
+      - name: at_risk_amount
+        description: "Total dollar amount at risk (excess discount + excess shipping)"
+        tests:
+          - not_null
+      
+      - name: review_priority_rank
+        description: "Priority ranking for flagged orders (1 = highest risk, null = not flagged)"
+
+  # ============================================
+  # REVENUE ANALYSIS MODEL (Q1 & Q2)
+  # ============================================
+  
+  - name: mart_revenue_analysis
+    description: |
+      Comprehensive revenue analysis combining monthly category performance (Q1)
+      with payment method breakdown and percentages (Q2). This mart provides
+      multi-dimensional revenue insights for business intelligence and reporting.
+      
+      **Business Questions Answered:**
+      
+      **Q1 - Revenue by Category and Month:**
+      - What is total revenue by product category for each month?
+      - How many orders and units sold per category/month?
+      - What is the average order value by category/month?
+      
+      **Q2 - Payment Method Analysis:**
+      - What percentage of sales comes from each payment method?
+      - How does payment method preference vary by category?
+      - What is revenue distribution across payment types?
+      
+      **Edge Case Handling (Q2 Requirement):**
+      Zero-quantity orders are included in the analysis but flagged via
+      category_month_zero_qty_orders field. These represent orders where
+      order_quantity = 0, which may indicate cancelled orders, returns,
+      or data quality issues requiring investigation.
+      
+      **Grain:** One row per month + category + payment method combination
+      
+      **Example row interpretation:**
+      "In January 2024, Electronics category generated $5,000 in Credit Card
+      revenue, representing 55% of total Electronics revenue that month."
+      
+      **Refresh Schedule:** Daily at 2 AM UTC
+      
+      **Primary Use Cases:**
+      - Executive revenue dashboards
+      - Category performance analysis
+      - Payment method optimization
+      - Monthly business reviews
+      - Trend analysis and forecasting
+    
+    columns:
+      # ============================================
+      # DIMENSION COLUMNS
+      # ============================================
+      
+      - name: order_month_date
+        description: "First day of the month (YYYY-MM-01 format) for time-series analysis"
+        tests:
+          - not_null
+      
+      - name: category_name
+        description: "Product category name"
+        tests:
+          - not_null
+      
+      - name: payment_method
+        description: "Payment method used (credit_card, paypal, debit_card, bank_transfer)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['credit_card', 'paypal', 'debit_card', 'bank_transfer']
+      
+      # ============================================
+      # PAYMENT METHOD METRICS (Q2)
+      # ============================================
+      
+      - name: payment_method_revenue
+        description: "Revenue from this payment method for this category/month"
+        tests:
+          - not_null
+      
+      - name: payment_method_order_count
+        description: "Number of orders using this payment method for this category/month"
+        tests:
+          - not_null
+      
+      - name: payment_method_pct_of_category_month
+        description: |
+          Percentage of category/month revenue from this payment method (Q2 core metric).
+          Calculated as: (payment_method_revenue / category_month_total_revenue * 100).
+          Should sum to 100% across all payment methods for each category/month.
+        tests:
+          - not_null
+      
+      - name: category_month_total_revenue
+        description: "Total revenue for this category/month across all payment methods (used in percentage calculation)"
+        tests:
+          - not_null
+      
+      # ============================================
+      # CATEGORY/MONTH AGGREGATE METRICS (Q1)
+      # ============================================
+      
+      - name: monthly_category_revenue
+        description: |
+          Total revenue by product category for each month (Q1 core metric).
+          This is the same value repeated across all payment method rows
+          for a given category/month to enable easy filtering and reporting.
+        tests:
+          - not_null
+      
+      - name: category_month_order_count
+        description: "Total number of orders for this category/month (all payment methods)"
+        tests:
+          - not_null
+      
+      - name: category_month_quantity_sold
+        description: "Total units sold for this category/month"
+        tests:
+          - not_null
+      
+      - name: category_month_avg_order_value
+        description: "Average order value for this category/month"
+        tests:
+          - not_null
+      
+      - name: category_month_zero_qty_orders
+        description: |
+          Count of orders with zero quantity for this category/month (Q2 edge case handling).
+          These orders are included in revenue totals but flagged for investigation.
+          Zero-quantity orders may indicate:
+          - Cancelled orders not properly removed
+          - Data quality issues
+          - Special order types (subscriptions, services)
+        tests:
+          - not_null       
+
+  # ============================================
+  # PAYMENT METHOD ANALYSIS MODEL (Q4)
+  # ============================================
+  
+  - name: mart_payment_method_analysis
+    description: |
+      Payment method preference and performance analysis (Q4).
+      High-level aggregate metrics across all time periods and categories
+      to understand overall payment method usage patterns and preferences.
+      
+      **Business Questions Answered:**
+      - Which payment methods generate the most revenue?
+      - What is the average transaction size by payment method?
+      - What percentage of our business comes from each payment method?
+      - Which payment methods are used most frequently?
+      
+      **Grain:** One row per payment method (4 rows total)
+      
+      **Use Cases:**
+      - Payment strategy decisions
+      - Fee negotiation with payment processors
+      - Checkout optimization priorities
+      - Fraud monitoring focus areas
+    
+    columns:
+      - name: payment_method
+        description: "Payment method identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: total_revenue
+        description: "Total revenue from this payment method (Q4 metric 1)"
+        tests:
+          - not_null
+      
+      - name: order_count
+        description: "Number of orders using this payment method (Q4 metric 2)"
+        tests:
+          - not_null
+      
+      - name: avg_order_value
+        description: "Average order value for this payment method (Q4 metric 3)"
+        tests:
+          - not_null
+      
+      - name: pct_of_total_revenue
+        description: "Percentage of total revenue from this payment method (Q4 metric 4)"
+        tests:
+          - not_null
+      
+      - name: pct_of_total_orders
+        description: "Percentage of total orders using this payment method"
+        tests:
+          - not_null
+      
+      - name: revenue_rank
+        description: "Rank by revenue (1 = highest revenue payment method)"
+        tests:
+          - unique
+          - not_null
+
+  # ============================================
+  # SEASONAL PATTERNS (Q6)
+  # ============================================
+  - name: mart_seasonal_patterns
+    description: |
+      Seasonal sales pattern analysis (Q6). Time-series metrics for
+      understanding category performance trends, growth, and volatility.
+      
+      **Requirements Covered:**
+      1. Monthly sales trends by category
+      2. Quarter-over-quarter growth rates
+      3. Best and worst performing months per category
+      4. Coefficient of variation for volatility measurement
+    
+    columns:
+      - name: order_month_date
+        tests:
+          - not_null
+      
+      - name: category_name
+        tests:
+          - not_null
+      
+      - name: monthly_revenue
+        description: "Monthly sales trend (Requirement 1)"
+        tests:
+          - not_null
+      
+      - name: qoq_growth_rate
+        description: "Quarter-over-quarter growth percentage (Requirement 2)"
+      
+      - name: is_best_month
+        description: "Flag for highest revenue month per category (Requirement 3)"
+        tests:
+          - not_null
+      
+      - name: is_worst_month
+        description: "Flag for lowest revenue month per category (Requirement 3)"
+        tests:
+          - not_null
+      
+      - name: coefficient_of_variation
+        description: "Stddev/Mean ratio for volatility measurement (Requirement 4)"
+
+  # ============================================
+  # MACRO USAGE - DAILY REVENUE (Q7)
+  # ============================================
+  - name: mart_daily_revenue
+    description: |
+      Daily revenue totals (Q7) demonstrating dynamic date filtering via macro.
+      Uses custom_date_filter macro to enable flexible date range analysis.
+      
+      **Q7 Requirements:**
+      - Macro accepts date range parameters 
+      - Filters sales data accordingly 
+      - Calculates daily revenue totals 
+      - Handles cases where no data exists 
+      
+      **Macro Usage:**
+      This model can be easily modified to analyze different time periods
+      by changing the macro parameters in the WHERE clause.
+    
+    columns:
+      - name: order_date
+        description: "Date of transactions"
+        tests:
+          - unique
+          - not_null
+      
+      - name: total_revenue
+        description: "Sum of revenue for this date"
+        tests:
+          - not_null
+      
+      - name: order_count
+        description: "Number of orders on this date"
+        tests:
+          - not_null
+      
+      - name: is_no_data_day
+        description: "Flag for days with no data (always false in this implementation)"
+        tests:
+          - not_null

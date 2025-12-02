@@ -1,0 +1,27 @@
+The Challenge Ahead
+Looking at the 7 questions, they fall into three distinct analytical patterns:
+Pattern 1: Sales Analysis (Questions 1, 2, 6)
+
+Revenue by category and time
+Payment method distribution
+Seasonal patterns and growth rates
+Common need: Sales data enriched with product categories and dates
+
+Pattern 2: Customer Analysis (Question 3)
+
+Customer segmentation by purchase behavior
+Lifetime value calculations
+Order frequency
+Common need: Customer purchase aggregations
+
+Pattern 3: Order Quality Analysis (Questions 4, 5)
+
+Payment method deep-dive
+Order flagging based on business rules
+Common need: Order-level details with all context
+
+Pattern 4: Dynamic Filtering (Question 7)
+
+Date-range macro
+Flexible reporting
+Common need: Reusable filtering logic

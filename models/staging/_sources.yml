@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw CSV files containing sales, customer, and product data"
+    schema: main
+    tables:
+      - name: customer
+        description: "Customer master data"
+        meta:
+          file_path: "../files/customer.csv"
+        
+      - name: sales_fact
+        description: "Sales transaction fact table"
+        meta:
+          file_path: "../files/sales_fact.csv"
+        
+      - name: product
+        description: "Product master data"
+        meta:
+          file_path: "../files/product.csv"
+        
+      - name: product_category
+        description: "Product category lookup table"
+        meta:
+          file_path: "../files/product_category.csv"
