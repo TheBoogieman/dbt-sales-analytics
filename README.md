@@ -1,5 +1,8 @@
 # dbt Sales Analytics Platform
 
+![GitHub stars](https://img.shields.io/github/stars/TheBoogieman/dbt-sales-analytics?style=social)
+![GitHub forks](https://img.shields.io/github/forks/TheBoogieman/dbt-sales-analytics?style=social)
+
 A production-grade analytics engineering project demonstrating modern data transformation practices using dbt (data build tool).
 
 ## 🎯 Project Overview
