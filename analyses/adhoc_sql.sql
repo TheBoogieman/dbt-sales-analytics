@@ -1,0 +1,1 @@
+select * from main_staging.stg_sales_fact;

@@ -7,7 +7,8 @@ A production-grade analytics engineering project demonstrating modern data trans
 
 ## 🎯 Project Overview
 
-This project transforms raw e-commerce sales data into actionable business intelligence through a well-architected data pipeline. Built following industry best practices for scalability, testability, and maintainability.
+This project transforms sample raw e-commerce sales data into actionable business intelligence through a well-architected data pipeline. 
+Built following industry best practices for scalability, testability, and maintainability.
 
 ### Business Questions Answered
 
@@ -60,6 +61,12 @@ This project transforms raw e-commerce sales data into actionable business intel
 ## 📂 Project Structure
 ```
 sales_analytics/
+├── analyses/              # Custom analytic SQL
+├── diagrams/              # Mermaid architechture diagrams
+├── files/                 # Sample csv files (duckdb is configured to read from here)
+├── macros/
+│   ├── custom_date_filter.sql    # Parameterized date filtering
+│   └── read_csv_source.sql       # DuckDB CSV reader
 ├── models/
 │   ├── staging/           # Clean & standardize raw data
 │   │   ├── _sources.yml
@@ -77,9 +84,9 @@ sales_analytics/
 │       ├── mart_payment_method_analysis.sql
 │       ├── mart_revenue_analysis.sql
 │       └── mart_seasonal_patterns.sql
-├── macros/
-│   ├── filter_date_range.sql    # Parameterized date filtering
-│   └── read_csv_source.sql      # DuckDB CSV reader
+├── queries/               # Sample python scripts to interact with duckdb
+├── seeds/                 # Custom business logic tests
+├── snapshots/
 ├── tests/                 # Custom business logic tests
 ├── dbt_project.yml
 └── README.md
@@ -144,11 +151,11 @@ sales_analytics/
 
 Based on the sample dataset:
 
-- **Customer Distribution**: 41 customers across 3 value tiers (High/Medium/Low)
-- **Revenue Analysis**: 100 orders totaling $X across Y product categories
-- **Payment Preferences**: Credit Card leads with Z% of transactions
-- **Flagged Orders**: N orders require review for high discounts or shipping costs
-- **Seasonal Trends**: QoQ growth rates ranging from -X% to +Y%
+- **Customer Distribution**: 61 customers across 3 value tiers (High/Medium/Low)
+- **Revenue Analysis**: 100+ orders with total revenue calculations across categories
+- **Payment Preferences**: Credit Card leads with 37.04% of transactions
+- **Flagged Orders**: 11 orders require review for high discounts or shipping costs
+- **Seasonal Trends**: QoQ growth rates ranging from -48.63% to +79.07%
 
 ## 🎯 Business Impact
 
@@ -175,13 +182,13 @@ Based on the sample dataset:
 ```
          /\
         /  \       Custom Business Logic Tests
-       /____\      - Payment percentages sum to 100%
-      /      \     - Revenue reconciliation across layers
-     /        \    - Threshold validation (discount, shipping)
+       /____\      - Payment percentages sum to 100% --needs implementing
+      /      \     - Revenue reconciliation across layers --needs implementing
+     /        \    - Threshold validation (discount, shipping) --needs implementing
     /__________\   
    /            \  Generic Schema Tests
-  /______________\ - unique, not_null, accepted_values
-                   - relationships (foreign keys)
+  /______________\ - unique, not_null, accepted_values --in place
+                   - relationships (foreign keys) --in place
 ```
 
 ### Run Tests
@@ -221,6 +228,7 @@ Opens interactive documentation with:
 - [ ] Integrate with CI/CD (GitHub Actions for automated testing)
 - [ ] Add data observability with elementary or re_data
 - [ ] Implement slowly changing dimensions (Type 2 SCD)
+- [ ] Full test coverage (Add custom business logic testing on top of generic dbt tests)
 
 ## 🤝 Contributing
 
@@ -235,7 +243,7 @@ MIT License - feel free to use this project as a learning resource or template f
 
 ## 👤 Author
 
-**Your Name**
+**Aydin Aksoy**
 - GitHub: [@TheBoogieman](https://github.com/TheBoogieman)
 - LinkedIn: [LinkedIn](https://www.linkedin.com/in/ayd%C4%B1n-aksoy-138714106/)
 

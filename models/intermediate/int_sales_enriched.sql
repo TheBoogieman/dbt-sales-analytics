@@ -153,7 +153,7 @@ sales_enriched as (
     
     -- Join category details (INNER: every product must have category info)
     inner join product_categories 
-        on sales.product_id = product_categories.product_id
+        on products.product_id = product_categories.product_id
 )
 
 select * from sales_enriched

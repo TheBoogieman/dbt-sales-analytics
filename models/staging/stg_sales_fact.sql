@@ -35,7 +35,7 @@ renamed as (
         -- Timestamp: cast and rename for clarity
         created_at::timestamp as order_created_at,
         
-        -- Financial columns: cast to DECIMAL for precision
+        -- Financial columns: cast to DECIMAL for precision, handle nulls
         order_amount::decimal(10,2) as order_amount,
         
         -- Quantity: cast to INTEGER

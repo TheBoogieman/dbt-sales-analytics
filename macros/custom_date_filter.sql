@@ -16,7 +16,7 @@
     Usage Example (Requires project prefix):
     SELECT *
     FROM {{ ref('int_sales_enriched') }}
-    WHERE {{ sales_analytics.filter_date_range(
+    WHERE {{ sales_analytics.custom_date_filter(
         start_date=var('start_date', none),
         date_column='event_timestamp'
     ) }}
