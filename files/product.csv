@@ -1,0 +1,36 @@
+product_id,product_name,product_category_id
+PROD001,Wireless Bluetooth Headphones,CAT001
+PROD002,Smartphone Case,CAT002
+PROD003,Gaming Laptop,CAT003
+PROD004,Coffee Maker,CAT004
+PROD005,Running Shoes,CAT005
+PROD006,Tablet 10-inch,CAT003
+PROD007,Kitchen Blender,CAT004
+PROD008,Fitness Tracker,CAT006
+PROD009,Desk Lamp,CAT007
+PROD010,Backpack,CAT008
+PROD011,4K Monitor,CAT003
+PROD012,Electric Kettle,CAT004
+PROD013,Winter Jacket,CAT005
+PROD014,Webcam HD,CAT003
+PROD015,Air Fryer,CAT004
+PROD016,Yoga Mat,CAT006
+PROD017,Office Chair,CAT007
+PROD018,Travel Mug,CAT009
+PROD019,Mechanical Keyboard,CAT003
+PROD020,Protein Powder,CAT010
+PROD021,Wireless Mouse,CAT003
+PROD022,Cooking Pan Set,CAT004
+PROD023,Basketball,CAT011
+PROD024,Smartphone,CAT003
+PROD025,Vacuum Cleaner,CAT007
+PROD026,Tennis Racket,CAT011
+PROD027,Smart Watch,CAT006
+PROD028,Dining Table,CAT007
+PROD029,Water Bottle,CAT009
+PROD030,Graphics Card,CAT003
+PROD031,Mixer Grinder,CAT004
+PROD032,Cycling Helmet,CAT011
+PROD033,Bookshelf,CAT007
+PROD034,Protein Bar,CAT010
+PROD035,Gaming Chair,CAT007

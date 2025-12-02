@@ -23,7 +23,7 @@
   
   {# Build the path to the CSV file #}
   {# Adjust this path based on where your files are relative to your project #}
-  {% set csv_path = '../files/' ~ table_name ~ '.csv' %}
+  {% set csv_path = 'files/' ~ table_name ~ '.csv' %}
   
   {# Return DuckDB's read_csv_auto function #}
   read_csv_auto('{{ csv_path }}', header=true, delim=',', nullstr='')
